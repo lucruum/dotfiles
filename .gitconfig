@@ -1,0 +1,86 @@
+[alias]
+    b = branch
+
+    co = checkout
+
+    cl = "!f() {                                        \
+        if [[ -z $(git clean --dry-run $@) ]]; then     \
+            exit;                                       \
+        fi;                                             \
+                                                        \
+        git clean --dry-run $@;                         \
+        read -p 'Remove [Y/n]? ';                       \
+        case ${REPLY:-yes} in                           \
+            y | Y | yes ) git clean --force $@ ;;       \
+            n | N | no ) ;;                             \
+            * ) echo \"I'll take that as a 'no'\" ;;    \
+        esac;                                           \
+    }; f"
+    clx = "!f() {                                           \
+        if [[ -z $(git clean --dry-run -d -x $@) ]]; then   \
+            exit;                                           \
+        fi;                                                 \
+                                                            \
+        git clean --dry-run -d -x $@;                       \
+        read -p 'Remove [Y/n]? ';                           \
+        case ${REPLY:-yes} in                               \
+            y | Y | yes ) git clean --force -d -x $@ ;;     \
+            n | N | no ) ;;                                 \
+            * ) echo \"I'll take that as a 'no'\" ;;        \
+        esac;                                               \
+    }; f"
+
+    cane = commit --all --amend --no-edit
+    wip = commit --all --message=[WIP]
+
+    d = diff --ignore-all-space --word-diff-regex=[[:alnum:]_]+|[[:punct:]] --word-diff=color
+
+    l = log --graph --oneline
+
+    p = push
+
+    edit = "!f() {                                                                                      \
+        git -c sequence.editor=\"sed '1 s/pick/edit/' --in-place\" rebase ${1:-HEAD}~1 --interactive;   \
+    }; f"
+    reword = "!f() {                                                                                    \
+        git -c sequence.editor=\"sed '1 s/pick/reword/' --in-place\" rebase ${1:-HEAD}~1 --interactive; \
+    }; f"
+    squash = "!f() {                                                                                    \
+        git -c sequence.editor=\"sed '2 s/pick/squash/' --in-place\" rebase ${1:-HEAD}~2 --interactive; \
+    }; f"
+
+    s = show --ignore-all-space --word-diff-regex=[[:alnum:]_]+|[[:punct:]] --word-diff=color
+
+    dot = stash show --ignore-all-space --word-diff-regex=[[:alnum:]_]+|[[:punct:]] --word-diff=color
+    drop = stash drop
+    hide = stash push
+    load = stash apply
+    reveal = stash pop
+    save = "!f() {                                  \
+        git stash store \"$(git stash create)\";    \
+    }; f"
+    shelve = "!f() {                            \
+        . \"$(git --exec-path)/git-sh-setup\";  \
+        require_clean_work_tree shelve;         \
+                                                \
+        m=$(git log --format=%B -1);            \
+        git reset HEAD~1 --soft;                \
+        git stash push --message=\"$m\";        \
+    }; f"
+    unshelve = "!f() {                                                                  \
+        . \"$(git --exec-path)/git-sh-setup\";                                          \
+        require_clean_work_tree unshelve;                                               \
+                                                                                        \
+        m=$(git stash list --format=%B -1 | sed '1 s/On [^:]+: //' --regexp-extended);  \
+        git stash pop;                                                                  \
+        git commit --all --message=\"$m\";                                              \
+    }; f"
+
+    st = status
+
+[core]
+    editor = code --wait
+
+[user]
+    email = naoh432@mail.ru
+    name = lucruum
